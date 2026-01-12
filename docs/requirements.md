@@ -1,13 +1,13 @@
 ## 1) まず採用する「Obsidian相互参照の書き方」標準
 
-この運用のキモは **“raw（1行メモ）をブロックとして固定し、後工程はリンク/埋め込みで参照する”** ことです。
+この運用のキモは **“raw（自由記述）をAIがブロック化し、後工程はリンク/埋め込みで参照する”** ことです。
 
 ### 内部リンク（ノート/見出し）
 
 - ノートへ：`[[ノート名]]`
 - 見出しへ：`[[ノート名#見出し]]`
 
-### ブロック参照（rawの1行を「追跡可能」にする）
+### ブロック参照（rawの1ブロックを「追跡可能」にする）
 
 - ブロックリンク：`[[ファイル名#^blockid]]`
 - ブロック埋め込み（トランスクルード）：`![[ファイル名#^blockid]]`
@@ -18,7 +18,7 @@
 - **スペースを1つ以上空けて** `^id` を書く
 - **許可文字は英数字とダッシュ**（`raw-20260111-001` 形式が安全）
 
-> つまり、iPhoneで「1行＝1メモ」で書けば、後でAIが ^raw-... を付けて、記事や要素から精密に参照できます。
+> つまり、iPhoneで自由に書いても、後でAIが ^raw-... を付けて、記事や要素から精密に参照できます。
 > 
 
 ---
@@ -105,8 +105,10 @@ Claude Code のメモリ（`CLAUDE.md`）と `.claude/rules/` のモジュール
 
 運用を成立させるためのルールはこれだけです：
 
-- **1行＝1メモ（箇条書き）**
-- AIが後で `^raw-YYYYMMDD-###` を付与（内容は書き換えない）
+- **自由記述（複数行OK）**
+  - 空行や箇条書きは「話題の区切り」のヒントになるが必須ではない
+  - AIが内容を見てブロック境界を決める
+- AIが後でブロック末尾に `^raw-YYYYMMDD-###` を付与（内容は書き換えない）
 - rawの「未使用/使用済み」は **RAW_UNUSED/RAW_USED で管理**
 
 テンプレ案（`90_templates/daily_raw.md`）：
@@ -119,7 +121,7 @@ date: {{YYYY-MM-DD}}
 
 # Daily Inbox (Raw) - {{YYYY-MM-DD}}
 
-## Captures (1 line per item)
+## Captures (freeform)
 -
 
 ```
@@ -326,7 +328,7 @@ flowchart TD
 
 **あなた**
 
-- iPhoneで `00_daily_raw/YYYY-MM-DD.md` に1行ずつ追記（気づいた瞬間）
+- iPhoneで `00_daily_raw/YYYY-MM-DD.md` に自由に追記（区切りは任意）
 
 **AI**
 
@@ -392,7 +394,7 @@ flowchart TD
 
 **AI**
 
-- その日の raw ノートを読み、各行に `^raw-YYYYMMDD-###` を付与（内容は改変しない）
+- その日の raw ノートを読み、内容を見てブロック境界を判断し、各ブロック末尾に `^raw-YYYYMMDD-###` を付与（内容は改変しない）
 - もし翌日分の raw ファイル（`00_daily_raw/YYYY-MM-DD.md`）が無ければ、`90_templates/daily_raw.md` から作成する
 - 新規rawブロックを `RAW_UNUSED.md` に **埋め込みリンク**として追記
 - すでに `RAW_USED.md` にあるものは触らない
@@ -419,6 +421,7 @@ flowchart TD
 - elementノートを作成（`elem-...`）
 - themeノートを作成/更新（`theme-...`）
 - theme⇄element の相互リンクを必ず更新
+- raw内で近接して書かれている内容ほど関連性が高いとみなし、テーマ/要素の紐付けに反映する
 - 一覧ファイル（THEMES_UNUSED / ELEMENTS_UNUSED etc）を更新
 - 処理済raw ID を `processed_raw_ids.md` に記録（raw本文は極力触らない）
 
@@ -760,22 +763,27 @@ allowed-tools:
 
 ## Goal
 - Rawノート（00_daily_raw/YYYY-MM-DD.md）を “追跡可能” にする。
-- 内容は改変しない。許可される編集は「行末に ^raw-YYYYMMDD-### を付ける」だけ。
+- 内容は改変しない。許可される編集は「ブロック末尾に ^raw-YYYYMMDD-### を付ける」だけ。
 
 ## Input
 - target_date (YYYY-MM-DD). If not provided, ask user.
 
 ## Steps
 1) Open 00_daily_raw/<target_date>.md
-2) Ensure each top-level bullet line has a block id:
+2) Determine raw block boundaries (AI judgment):
+   - Start with blank-line separated segments as candidates.
+   - Split a segment if distinct topics are clearly present.
+   - Merge adjacent segments if they are clearly the same topic.
+   - Boundaries must be between existing lines.
+3) Ensure each block end has a block id:
    - Format: ^raw-YYYYMMDD-001, ^raw-YYYYMMDD-002...
    - Only append; do not reorder, paraphrase, or delete.
-3) Update 00_daily_raw/RAW_UNUSED.md:
+4) Update 00_daily_raw/RAW_UNUSED.md:
    - For each newly discovered raw block id not present in RAW_UNUSED or RAW_USED,
      append a line:
      - ![[00_daily_raw/<target_date>#^raw-YYYYMMDD-###]]
-4) Do not move anything to RAW_USED here (that is S8 only).
-5) Write a short report: how many IDs added, how many new blocks indexed.
+5) Do not move anything to RAW_USED here (that is S8 only).
+6) Write a short report: how many IDs added, how many new blocks indexed.
 
 ```
 
@@ -821,6 +829,7 @@ allowed-tools:
       - ![[00_daily_raw/<date>#^raw-...]]
    c) Suggest/assign 1-3 candidate themes:
       - Either link to an existing theme note (if match), or create a new theme note.
+      - Treat nearby/raw-adjacent blocks as stronger signals for the same theme.
    d) Update the theme note to link back to the element note.
 4) Append processed raw ids to 99_logs/processed_raw_ids.md (append-only).
 5) Rebuild/update index files:
@@ -1242,7 +1251,7 @@ Claude Code には多くのツールがあり、WebSearch/WebFetch/AskUserQuesti
 
 ### 日中（随時）
 
-- iPhoneで `00_daily_raw/YYYY-MM-DD.md` に 1行で追加するだけ
+- iPhoneで `00_daily_raw/YYYY-MM-DD.md` に自由に追加するだけ
 - deep researchを貼ったら `/knowledge-process 70_knowledge/<file>.md`
 
 ### 毎朝（記事を書く時間）

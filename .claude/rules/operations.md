@@ -1,6 +1,7 @@
 # Blog OS Operational Rules (Always)
 
-- raw本文は書き換え禁止。行末へのブロックID追加のみ許可。
+- raw本文は書き換え禁止。AIが判断したブロック末尾へのブロックID追加のみ許可。
+- 空行や箇条書きはブロック境界のヒントだが必須ではない。
 - ブロックIDは ^raw-YYYYMMDD-### 形式、前にスペースを1つ以上入れる。
 - theme/element のファイル移動は禁止。statusで管理する。
 - 相互参照はObsidian標準記法のみ（[[...]] / [[file#^id]] / ![[file#^id]]）。

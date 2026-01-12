@@ -27,7 +27,7 @@
 
 このVaultで以下が可能になること：
 
-1. iPhoneで raw を追記するだけでよい
+1. iPhoneで raw を追記するだけでよい（自由記述、区切りは任意）
 2. 朝 `/blog-morning` を実行すると：
    - raw に block id が付与され
    - raw → elements / themes が整理され

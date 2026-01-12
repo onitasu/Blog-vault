@@ -14,7 +14,7 @@ allowed-tools:
 
 ## Goal
 - Rawノート（00_daily_raw/YYYY-MM-DD.md）を追跡可能にする。
-- 内容は改変しない。許可される編集は行末へのブロックID追加のみ。
+- 内容は改変しない。許可される編集はブロック末尾へのID追加のみ。
 
 ## Inputs
 - target_date (YYYY-MM-DD). If not provided, ask the user.
@@ -22,16 +22,21 @@ allowed-tools:
 ## Steps
 1) Open 00_daily_raw/<target_date>.md.
 2) If 00_daily_raw/<next_date>.md does not exist, create it from 90_templates/daily_raw.md and replace {{YYYY-MM-DD}} with <next_date>.
-3) For each raw bullet line, ensure a block id exists:
+3) Determine raw block boundaries (AI judgment):
+   - Start with blank-line separated segments as candidates.
+   - Split a segment into multiple blocks if distinct topics are clearly present.
+   - Merge adjacent segments if they are clearly the same topic.
+   - Boundaries must be between existing lines (no rewriting).
+4) For each raw block, ensure a block id exists on the last line:
    - Format: ^raw-YYYYMMDD-###
    - Append with at least one preceding space.
    - Only append; do not reorder, paraphrase, or delete.
-4) Update 00_daily_raw/RAW_UNUSED.md:
+5) Update 00_daily_raw/RAW_UNUSED.md:
    - For each newly discovered raw block id not present in RAW_UNUSED or RAW_USED,
      append a line:
      - ![[00_daily_raw/<target_date>#^raw-YYYYMMDD-###]]
-5) Do not move anything to RAW_USED here (that is S8 only).
-6) Report how many IDs were added, how many new blocks were indexed, and whether the next-day file was created.
+6) Do not move anything to RAW_USED here (that is S8 only).
+7) Report how many IDs were added, how many new blocks were indexed, and whether the next-day file was created.
 
 ## Updates
 - 00_daily_raw/<target_date>.md

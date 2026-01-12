@@ -20,7 +20,8 @@
 ## 日々の運用フロー
 
 ### 日中（随時）
-- `00_daily_raw/YYYY-MM-DD.md` に **1行＝1メモ** で追記
+- `00_daily_raw/YYYY-MM-DD.md` に自由に追記（区切りは任意）
+  - 近接して書いた内容は同じ話題として扱われやすい
 
 ### deep research を貼った日
 - `70_knowledge/<title>.md` を作成しRaw pasteに貼り付け

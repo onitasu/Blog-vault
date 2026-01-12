@@ -31,6 +31,7 @@ allowed-tools:
       - ![[00_daily_raw/<date>#^raw-...]]
    c) Suggest/assign 1-3 candidate themes:
       - Link to existing theme notes when possible, or create a new theme note using 90_templates/theme.md.
+      - Treat nearby/raw-adjacent blocks as stronger signals for the same theme.
    d) Update the theme note to link back to the element note.
 4) Append processed raw IDs to 99_logs/processed_raw_ids.md (append-only).
 5) Rebuild/update index files (read frontmatter status; do not rely on plugins):
