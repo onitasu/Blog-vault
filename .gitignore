@@ -1,0 +1,8 @@
+# Obsidian
+.obsidian/
+
+# Claude Code
+.claude/
+
+# OS files
+.DS_Store
